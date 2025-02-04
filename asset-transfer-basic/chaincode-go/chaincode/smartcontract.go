@@ -16,22 +16,16 @@ type SmartContract struct {
 // Insert struct field in alphabetic order => to achieve determinism across languages
 // golang keeps the order when marshal to json but doesn't order automatically
 type Asset struct {
-	AppraisedValue int    `json:"AppraisedValue"`
-	Color          string `json:"Color"`
-	ID             string `json:"ID"`
-	Owner          string `json:"Owner"`
-	Size           int    `json:"Size"`
+	ID           string  `json:"ID"`
+	Temperature  float64 `json:"Temperature"`
+	Humidity     float64 `json:"Humidity"`
+	PhNo         string  `json:"PhNo"`
 }
 
 // InitLedger adds a base set of assets to the ledger
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
 	assets := []Asset{
-		{ID: "asset1", Color: "blue", Size: 5, Owner: "Tomoko", AppraisedValue: 300},
-		{ID: "asset2", Color: "red", Size: 5, Owner: "Brad", AppraisedValue: 400},
-		{ID: "asset3", Color: "green", Size: 10, Owner: "Jin Soo", AppraisedValue: 500},
-		{ID: "asset4", Color: "yellow", Size: 10, Owner: "Max", AppraisedValue: 600},
-		{ID: "asset5", Color: "black", Size: 15, Owner: "Adriana", AppraisedValue: 700},
-		{ID: "asset6", Color: "white", Size: 15, Owner: "Michel", AppraisedValue: 800},
+		{ID: "asset1", Temperature: 23.5, Humidity: 45.2, PhNo: "+919293092473"},
 	}
 
 	for _, asset := range assets {
@@ -50,7 +44,7 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 }
 
 // CreateAsset issues a new asset to the world state with given details.
-func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface, id string, color string, size int, owner string, appraisedValue int) error {
+func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface, id string, temperature float64, humidity float64, phno string) error {
 	exists, err := s.AssetExists(ctx, id)
 	if err != nil {
 		return err
@@ -60,11 +54,10 @@ func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface,
 	}
 
 	asset := Asset{
-		ID:             id,
-		Color:          color,
-		Size:           size,
-		Owner:          owner,
-		AppraisedValue: appraisedValue,
+		ID:          id,
+		Temperature: temperature,
+		Humidity:    humidity,
+		PhNo:        phno,
 	}
 	assetJSON, err := json.Marshal(asset)
 	if err != nil {
@@ -94,7 +87,7 @@ func (s *SmartContract) ReadAsset(ctx contractapi.TransactionContextInterface, i
 }
 
 // UpdateAsset updates an existing asset in the world state with provided parameters.
-func (s *SmartContract) UpdateAsset(ctx contractapi.TransactionContextInterface, id string, color string, size int, owner string, appraisedValue int) error {
+func (s *SmartContract) UpdateAsset(ctx contractapi.TransactionContextInterface, id string, temperature float64, humidity float64, phno string) error {
 	exists, err := s.AssetExists(ctx, id)
 	if err != nil {
 		return err
@@ -103,13 +96,12 @@ func (s *SmartContract) UpdateAsset(ctx contractapi.TransactionContextInterface,
 		return fmt.Errorf("the asset %s does not exist", id)
 	}
 
-	// overwriting original asset with new asset
+	// Overwriting original asset with new asset
 	asset := Asset{
-		ID:             id,
-		Color:          color,
-		Size:           size,
-		Owner:          owner,
-		AppraisedValue: appraisedValue,
+		ID:          id,
+		Temperature: temperature,
+		Humidity:    humidity,
+		PhNo:        phno,
 	}
 	assetJSON, err := json.Marshal(asset)
 	if err != nil {
@@ -142,15 +134,15 @@ func (s *SmartContract) AssetExists(ctx contractapi.TransactionContextInterface,
 	return assetJSON != nil, nil
 }
 
-// TransferAsset updates the owner field of asset with given id in world state, and returns the old owner.
-func (s *SmartContract) TransferAsset(ctx contractapi.TransactionContextInterface, id string, newOwner string) (string, error) {
+// TransferAsset updates the TruckID field of asset with given id in world state, and returns the old TruckID.
+/*func (s *SmartContract) TransferAsset(ctx contractapi.TransactionContextInterface, id string, newTruckID string) (string, error) {
 	asset, err := s.ReadAsset(ctx, id)
 	if err != nil {
 		return "", err
 	}
 
-	oldOwner := asset.Owner
-	asset.Owner = newOwner
+	oldTruckID := asset.TruckID
+	asset.TruckID = newTruckID
 
 	assetJSON, err := json.Marshal(asset)
 	if err != nil {
@@ -162,12 +154,12 @@ func (s *SmartContract) TransferAsset(ctx contractapi.TransactionContextInterfac
 		return "", err
 	}
 
-	return oldOwner, nil
+	return oldTruckID, nil
 }
-
+*/
 // GetAllAssets returns all assets found in world state
 func (s *SmartContract) GetAllAssets(ctx contractapi.TransactionContextInterface) ([]*Asset, error) {
-	// range query with empty string for startKey and endKey does an
+	// Range query with empty string for startKey and endKey does an
 	// open-ended query of all assets in the chaincode namespace.
 	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
@@ -192,3 +184,5 @@ func (s *SmartContract) GetAllAssets(ctx contractapi.TransactionContextInterface
 
 	return assets, nil
 }
+
+
