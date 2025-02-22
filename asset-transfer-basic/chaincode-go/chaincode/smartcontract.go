@@ -20,6 +20,7 @@ type Asset struct {
 	Temperature  float64 `json:"Temperature"`
 	Humidity     float64 `json:"Humidity"`
 	PhNo         string  `json:"PhNo"`
+	Message      string  `json:"Message"`
 }
 
 // InitLedger adds a base set of assets to the ledger
@@ -44,7 +45,7 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 }
 
 // CreateAsset issues a new asset to the world state with given details.
-func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface, id string, temperature float64, humidity float64, phno string) error {
+func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface, id string, temperature float64, humidity float64, phno string, message string) error {
 	exists, err := s.AssetExists(ctx, id)
 	if err != nil {
 		return err
@@ -58,6 +59,7 @@ func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface,
 		Temperature: temperature,
 		Humidity:    humidity,
 		PhNo:        phno,
+		Message:     message,
 	}
 	assetJSON, err := json.Marshal(asset)
 	if err != nil {
